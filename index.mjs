@@ -1,15 +1,3 @@
-/*
-
-Как пользоваться:
-
-node index.mjs "-----" "кучесина" "о----" "----р"
-
-"-----" — известные буква на верных позициях (жёлтые)
-"кучесина" — буквы, которых нет (серые)
-Любое количество следующих аргументов — буквы, которые есть, но на неверных позициях (белые)
-
-*/
-
 import * as fs from 'fs'
 import * as readline from 'readline'
 
@@ -28,10 +16,22 @@ console.log('Известные буквы на верных позициях:',
 console.log('Буквы, которые есть, но позиции неизвестны:', [...knownToExist].join(''))
 console.log('Где нет этих букв:', wrongPositions)
 console.log('Буквы, которых нет:', knownToMiss)
-console.log('Подходящие слова:')
+
+function doesMatchMask(mask, word) {
+  for (let i = 0; i < word.length; ++i) {
+    if (!blanks.has(mask[i])) {
+      if (word[i] !== mask[i]) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+const matchingWords = []
 
 const rl = readline.createInterface({
-  input: fs.createReadStream('russian_filtered.txt'), // Только существительные в дефолтной форме 5 букв
+  input: fs.createReadStream('russianNouns5Letters.txt'), // Только существительные в дефолтной форме 5 букв
   crlfDelay: Infinity,
 })
 
@@ -63,18 +63,56 @@ for await (const line of rl) {
       }
     }
   }
-  console.log(word)
+  matchingWords.push(word)
 }
 
-function doesMatchMask(mask, word) {
-  for (let i = 0; i < word.length; ++i) {
-    if (!blanks.has(mask[i])) {
-      if (word[i] !== mask[i]) {
-        return false
-      }
-    }
+// https://ru.wikipedia.org/wiki/Частотность
+const letterFrequency = {
+  'а': 40487008,
+  'б': 8051767,
+  'в': 22930719,
+  'г': 8564640,
+  'д': 15052118,
+  'е': 42691213 + 184928,
+  'ж': 4746916,
+  'з': 8329904,
+  'и': 37153142,
+  'й': 6106262,
+  'к': 17653469,
+  'л': 22230174,
+  'м': 16203060,
+  'н': 33838881,
+  'о': 55414481,
+  'п': 14201572,
+  'р': 23916825,
+  'с': 27627040,
+  'т': 31620970,
+  'у': 13245712,
+  'ф': 1335747,
+  'х': 4904176,
+  'ц': 2438807,
+  'ч': 7300193,
+  'ш': 3678738,
+  'щ': 1822476,
+  'ъ': 185452,
+  'ы': 9595941,
+  'ь': 8784613,
+  'э': 1610107,
+  'ю': 3220715,
+  'я': 10139085,
+}
+
+function getFrequencyScore(word) {
+  let seenLetters = new Set()
+  let score = 0
+  for (let letter of word) {
+    letter = letter.toLowerCase()
+    // Повторяющиеся буквы дают меньше очков, чтобы
+    score += (letterFrequency[letter] ?? 0) * (seenLetters.has(letter) ? 0.5 : 1)
+    seenLetters.add(letter)
   }
-  return true
+  return score
 }
 
-// todo: Сортировать слова по частотности букв: https://ru.wikipedia.org/wiki/Частотность
+matchingWords.sort((word1, word2) => getFrequencyScore(word2) - getFrequencyScore(word1))
+console.log('Подходящие слова:', matchingWords)
