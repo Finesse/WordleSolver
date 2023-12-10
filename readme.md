@@ -5,6 +5,8 @@
 Помогает решать игру «5 букв» от Тинькофф.
 Далеко не лучшая реализация, делаю исключительно для себя.
 
+Словарь сделан на основе [github.com/Harrix/Russian-Nouns](https://github.com/Harrix/Russian-Nouns/blob/6f0ae9f0619cf0401c6935b7cbba1165bf4c7f19/dist/russian_nouns.txt).
+
 ## Как пользоваться
 
 Установите [Node.js](https://nodejs.org/).

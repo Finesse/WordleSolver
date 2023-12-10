@@ -37,7 +37,8 @@ const rl = readline.createInterface({
 
 lines:
 for await (const line of rl) {
-  const word = line.trim().toLowerCase().replaceAll('ё', 'е')
+  const displayedWord = line.trim()
+  const word = displayedWord.toLowerCase().replaceAll('ё', 'е')
   if (word.length !== expectedLength) {
     continue
   }
@@ -63,7 +64,7 @@ for await (const line of rl) {
       }
     }
   }
-  matchingWords.push(word)
+  matchingWords.push(displayedWord)
 }
 
 // https://ru.wikipedia.org/wiki/Частотность
